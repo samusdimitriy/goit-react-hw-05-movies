@@ -1,25 +1,35 @@
 import styled from '@emotion/styled';
+import { NavLink } from 'react-router-dom';
 
 export const Container = styled.div`
-  padding: 20px;
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
+  padding: 0 16px;
 `;
 
 export const Header = styled.header`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid black;
+
+  > nav {
+    display: flex;
+  }
 `;
 
-export const Link = styled.nav`
-  font-size: 20px;
-  font-weight: 700;
-  color: #000;
+export const Link = styled(NavLink)`
+  padding: 8px 16px;
+  border-radius: 4px;
   text-decoration: none;
-  margin-right: 20px;
+  color: #212121;
+  font-weight: 500;
+
   &.active {
-    color: #f44336;
+    color: white;
+    background-color: orange;
   }
 `;

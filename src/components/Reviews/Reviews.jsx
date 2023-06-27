@@ -3,30 +3,38 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchReviews } from '../../services/movies-api';
+import { Container, Description, Item, List, Title } from './Reviews.styled';
+import Loader from 'components/Loader/Loader';
 
 const Reviews = () => {
   const { movieId } = useParams();
   const [reviews, setReviews] = useState(null);
+  const [loader, setLoader] = useState(false);
 
   useEffect(() => {
+    setLoader(true);
     fetchReviews(movieId).then(setReviews);
+    setLoader(false);
   }, [movieId]);
 
   return (
-    <div>
-      {reviews && reviews.length > 0 ? (
-        <ul>
-          {reviews.map(({ id, author, content }) => (
-            <li key={id}>
-              <h3>{author}</h3>
-              <p>{content}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>We don't have any reviews for this movie</p>
-      )}
-    </div>
+    <>
+      {loader && <Loader />}
+      <Container>
+        {reviews && reviews.length > 0 ? (
+          <List>
+            {reviews.map(({ id, author, content }) => (
+              <Item key={id}>
+                <Title>{author}</Title>
+                <Description>{content}</Description>
+              </Item>
+            ))}
+          </List>
+        ) : (
+          <p>We don't have any reviews for this movie</p>
+        )}
+      </Container>
+    </>
   );
 };
 

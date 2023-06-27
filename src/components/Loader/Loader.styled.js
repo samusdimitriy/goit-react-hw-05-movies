@@ -18,7 +18,7 @@ export const LoaderSpinner = styled.div`
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  border: 5px solid #f44336;
+  border: 5px solid orange;
   border-top-color: transparent;
   animation: ${spin} 1s linear infinite;
 `;
