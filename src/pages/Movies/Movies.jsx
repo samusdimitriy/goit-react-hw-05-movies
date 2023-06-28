@@ -1,48 +1,26 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { fetchMoviesByQuery } from '../../services/movies-api';
-import { SearchContext } from '../../context/SearchContext';
 import MoviesList from 'components/MoviesList/MoviesList';
 import { Button, FormSearch, Input } from './Movies.styled';
-import PropTypes from 'prop-types';
 import Loader from 'components/Loader/Loader';
 
 const Movies = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { searchQuery, setSearchQuery } = useContext(SearchContext);
-  const [initialQuery, setInitialQuery] = useState('');
+  const [inputQuery, setInputQuery] = useState('');
   const [showNotFoundMessage, setShowNotFoundMessage] = useState(false);
   const [loader, setLoader] = useState(false);
+  const [movies, setMovies] = useState([]);
 
   useEffect(() => {
-    const query = searchParams.get('query') ?? '';
-
-    if (query !== initialQuery) {
-      setInitialQuery(query);
-      setShowNotFoundMessage(false);
-      setLoader(true);
-
-      if (query === '') {
-        setSearchQuery([]);
-        setLoader(false);
-      } else {
-        fetchMoviesByQuery(query)
-          .then(data => {
-            setSearchQuery(data);
-            if (data.length === 0) {
-              setShowNotFoundMessage(true);
-            }
-          })
-          .catch(error => {
-            if (error.response && error.response.status === 404) {
-              setSearchQuery([]);
-              setShowNotFoundMessage(true);
-            }
-          })
-          .finally(() => setLoader(false));
-      }
-    }
-  }, [searchParams, setSearchQuery, initialQuery]);
+    const query = searchParams.get('query');
+    if (!query) return;
+    setInputQuery(query);
+    fetchMoviesByQuery(query).then(data => {
+      if (!data.length) return setShowNotFoundMessage(true);
+      setMovies(data);
+    });
+  }, [searchParams]);
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -51,12 +29,26 @@ const Movies = () => {
     setSearchParams({ query: value });
 
     if (value === '') {
-      setSearchQuery([]);
+    } else {
+      setLoader(true);
+
+      fetchMoviesByQuery(value)
+        .then(data => {
+          if (data.length === 0) {
+            setShowNotFoundMessage(true);
+          }
+        })
+        .catch(error => {
+          if (error.response && error.response.status === 404) {
+            setShowNotFoundMessage(true);
+          }
+        })
+        .finally(() => setLoader(false));
     }
   };
 
   const handleInputChange = e => {
-    setInitialQuery(e.target.value);
+    setInputQuery(e.target.value);
   };
 
   return (
@@ -66,31 +58,22 @@ const Movies = () => {
           <Input
             type="text"
             name="search"
+            value={inputQuery}
             onChange={handleInputChange}
             placeholder="Enter a search query"
           />
+
           <Button type="submit">Search</Button>
         </FormSearch>
         {showNotFoundMessage && <p>We apologize, the movies were not found.</p>}
         {loader ? (
           <Loader />
         ) : (
-          searchQuery &&
-          searchQuery.length > 0 && <MoviesList movies={searchQuery} />
+          movies && movies.length > 0 && <MoviesList movies={movies} />
         )}
       </div>
     </>
   );
-};
-
-Movies.propTypes = {
-  searchQuery: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      poster_path: PropTypes.string,
-      title: PropTypes.string.isRequired,
-    })
-  ),
 };
 
 export default Movies;
